@@ -8,13 +8,14 @@ using Core.Interfaces;
 using Core.Specifications;
 using API.Dtos;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
+using API.Errors;
 
 namespace API.Controllers
 {
     //we need to inject our store context into products controller
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ProductsController : ControllerBase
+    
+    public class ProductsController : BaseApiController
     {
         //private readonly IProductRepository _repo;
         //version 1 implementation   
@@ -37,7 +38,6 @@ namespace API.Controllers
             _prodocutTypeRepo = prodocutTypeRepo;
             _productBrandRepo = productBrandRepo;
             _productRepo = productRepo;
-
         }
 
 
@@ -53,6 +53,8 @@ namespace API.Controllers
                         return Ok(_mapper.Map<IReadOnlyList<Product>,IReadOnlyList<ProductToReturnDto>>(products));
         }
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse),StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ProductToReturnDto>> GetProduct(int id)
         {
             //return await _productRepo.GetByIdAsync(id);
@@ -60,6 +62,7 @@ namespace API.Controllers
             //version 2 with spec
             var spec = new ProductsWithTypesAndBrandsSpecification(id);
             var product = await _productRepo.GetEntityWithSpec(spec);
+            if (product ==null) return NotFound(new ApiResponse(404));
             return _mapper.Map<Product,ProductToReturnDto>(product);
         }
         [HttpGet("brands")]
@@ -69,6 +72,7 @@ namespace API.Controllers
             //used Ok to return because IreadOnlyList is not acceptable while converting the datatype to List
             //its just a dotnet quirk to get around the problem 
         }
+        [HttpGet("types")]
         public async Task<ActionResult<IReadOnlyList<ProductType>>> GetProductTypesAsync()
         {
             return Ok(await _prodocutTypeRepo.ListAllAsync());
