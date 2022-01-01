@@ -1,5 +1,6 @@
 
 
+using API.Helpers;
 using Core.Interfaces;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Builder;
@@ -24,6 +25,8 @@ namespace API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddScoped<IProductRepository,ProductRepository>();
+            services.AddScoped(typeof(IGenericRepository<>),typeof(GenericRepository<>));
+            services.AddAutoMapper(typeof(MappingProfiles));
             services.AddControllers();
             //we need to add our datacontext or our StoreContext as a service so that we can use it in the other 
             //parts of our application
@@ -42,7 +45,8 @@ namespace API
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            //ordering of below statement is important
+            app.UseStaticFiles();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
