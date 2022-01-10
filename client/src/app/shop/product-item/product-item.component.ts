@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { IProduct } from '../../shared/models/product';
+import { BasketService } from '../../basket/basket.service';
 
 
 
@@ -10,9 +11,13 @@ import { IProduct } from '../../shared/models/product';
 })
 export class ProductItemComponent implements OnInit {
 @Input() product!:IProduct;
-  constructor() { }
+  constructor(private BasketService:BasketService) { }
 
   ngOnInit(): void {
+  }
+
+  addItemToBasket(){
+    this.BasketService.addItemToBasket(this.product);
   }
 
 }

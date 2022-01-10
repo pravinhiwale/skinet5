@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using API.Extensions;
+using StackExchange.Redis;
 
 namespace API
 {
@@ -36,6 +37,12 @@ namespace API
             //we need to add our datacontext or our StoreContext as a service so that we can use it in the other 
             //parts of our application
             services.AddDbContext<StoreContext>(x=>x.UseSqlite(_config.GetConnectionString("DefaultConnection")));
+            services.AddSingleton<IConnectionMultiplexer>(c=>
+            {
+                var configuration=ConfigurationOptions.Parse(_config.GetConnectionString("Redis"),
+                true);
+                return ConnectionMultiplexer.Connect(configuration);
+            });
             services.AddApplicationServices();
             services.AddSwaggerDocumentation();
             services.AddCors(opt=>
