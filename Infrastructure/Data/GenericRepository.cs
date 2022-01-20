@@ -23,7 +23,6 @@ namespace Infrastructure.Data
 
         public async Task<T> GetByIdAsync(int id)
         {
-           
            return await _context.Set<T>().FindAsync(id);
         }
 
@@ -34,7 +33,6 @@ namespace Infrastructure.Data
 
         public async Task<IReadOnlyList<T>> ListAllAsync()
         {
-           
             return await _context.Set<T>().ToListAsync();
         }
 

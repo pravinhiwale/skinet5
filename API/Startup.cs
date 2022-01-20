@@ -1,11 +1,10 @@
-
-
 using System.Linq;
 using API.Errors;
 using API.Helpers;
 using API.Middleware;
 using Core.Interfaces;
 using Infrastructure.Data;
+using Infrastructure.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -31,12 +30,14 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-           
             services.AddAutoMapper(typeof(MappingProfiles));
             services.AddControllers();
             //we need to add our datacontext or our StoreContext as a service so that we can use it in the other 
             //parts of our application
             services.AddDbContext<StoreContext>(x=>x.UseSqlite(_config.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<AppIdentityDbContext>(x=>{
+                x.UseSqlite(_config.GetConnectionString("IdentityConnection"));
+            });
             services.AddSingleton<IConnectionMultiplexer>(c=>
             {
                 var configuration=ConfigurationOptions.Parse(_config.GetConnectionString("Redis"),
@@ -44,14 +45,13 @@ namespace API
                 return ConnectionMultiplexer.Connect(configuration);
             });
             services.AddApplicationServices();
+            services.AddIdentityServices(_config);
             services.AddSwaggerDocumentation();
             services.AddCors(opt=>
             {
                 opt.AddPolicy("CorsPolicy",policy =>{
-                    policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200");
-                });
+                    policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200");});
             });
-           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,11 +68,9 @@ namespace API
             //ordering of below statement is important
             app.UseStaticFiles();
             app.UseCors("CorsPolicy");
+            app.UseAuthentication();
             app.UseAuthorization();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
     }
 }

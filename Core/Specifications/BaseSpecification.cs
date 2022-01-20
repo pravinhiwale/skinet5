@@ -9,7 +9,6 @@ namespace Core.Specifications
         public BaseSpecification()
         {
         }
-        
         public BaseSpecification(Expression<Func<T, bool>> criteria)
         {
             Criteria = criteria;
@@ -30,7 +29,6 @@ namespace Core.Specifications
         protected void AddInclude(Expression<Func<T,Object>> includeExpression){
             Includes.Add(includeExpression);
         }
-        
         protected void AddOrderBy(Expression<Func<T,Object>> orderByExpression){
             OrderBy=orderByExpression;
         }

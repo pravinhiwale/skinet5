@@ -14,7 +14,6 @@ namespace Infrastructure.Data
     {
         public StoreContext( DbContextOptions<StoreContext> options) : base(options)
         {
-
         }
         //Pluralized name of the entity , its the convention , so products would be the name of the table created
         public DbSet<Product> Products{get;set;}

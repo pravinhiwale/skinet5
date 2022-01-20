@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Core.Entities.Identity;
 using Infrastructure.Data;
+using Infrastructure.Identity;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,17 +25,22 @@ namespace API
             //of the context we are going to do this inside a "using" statement
             //"using" statement means any code that runs inside of this is going to be disposed of as soon as we finish the methods inside it
             //we don't need to worry about cleaning up and disposing
-            using (var scope= host.Services.CreateScope()) 
+            using (var scope= host.Services.CreateScope())
             {
                     var services= scope.ServiceProvider;
                     //loggerfactory helps to log messages to console
-                    var loggerFactory = services.GetRequiredService<ILoggerFactory>(); 
+                    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
                     try
                     {
                         var context = services.GetRequiredService<StoreContext>();
                         await context.Database.MigrateAsync();
                         //this above code will create database if database doesn't exist
                         await StoreContextSeed.SeedAsync(context,loggerFactory);
+
+                        var userManager=services.GetRequiredService<UserManager<AppUser>>();
+                        var identityContext= services.GetRequiredService<AppIdentityDbContext>();
+                        await identityContext.Database.MigrateAsync();
+                        await AppIdentityDbContextSeed.SeedUsersAsync(userManager);
                     } catch(Exception ex)
                     {
                         var logger = loggerFactory.CreateLogger<Program>();
@@ -40,14 +48,10 @@ namespace API
                     }
             }
             host.Run();
-
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
+                .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
     }
 }

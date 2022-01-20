@@ -9,11 +9,8 @@ namespace API.Errors
             StatusCode = statusCode;
             Message = message ?? GetDefaultMessageForStatusCode(StatusCode);
             //?? is null coalescing operator
-
         }
-
         public int StatusCode { get; set; }
-        
         public string Message { get; set; }
 
         private string GetDefaultMessageForStatusCode(int statusCode)
@@ -26,7 +23,6 @@ namespace API.Errors
                 500=> "Errors are the path to the dark side. Errors led to anger. Anger leas to hate. Hate leads to career change",
                 _ => null
             };
-        }        
-        
+        }
     }
 }

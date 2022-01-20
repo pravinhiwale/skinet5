@@ -9,7 +9,6 @@ namespace Core.Specifications
             (!productParams.TypeId.HasValue || x.ProductTypeId==productParams.TypeId)
         )
         {
-
         }
     }
 }
